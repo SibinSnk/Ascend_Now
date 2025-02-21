@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-info text-white text-center">
+                    <h3 class="mb-0">👨‍👩‍👧 Add Parent</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('add_parent') }}" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="parent_name" class="form-label">👤 Parent Name</label>
+                            <input type="text" class="form-control" id="parent_name" name="parent_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">📧 Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">📞 Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label"> Student Admission Number</label>
+                            <input type="number" class="form-control" id="phone" name="admission_number" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">✅ Add Parent</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

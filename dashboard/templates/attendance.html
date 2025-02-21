@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">📌 Mark Attendance</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('mark_attendance') }}">
+                        <div class="mb-3">
+                            <label for="date" class="form-label">📅 Select Date</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="class_id" class="form-label">🏫 Select Class</label>
+                                <select class="form-select" id="class_id" name="class_id">
+                                    <option value="">-- Choose Class --</option>
+                                    {% for class in classes %}
+                                        <option value="{{ class.id }}">{{ class.class_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="section_id" class="form-label">📖 Select Section</label>
+                                <select class="form-select" id="section_id" name="section_id">
+                                    <option value="">-- Choose Section --</option>
+                                    {% for section in sections %}
+                                        <option value="{{ section.id }}">{{ section.section_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="loading" class="text-center mt-3" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Fetching Students...</p>
+                        </div>
+
+                        <div id="student-table-container" style="display: none;" class="mt-4">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>👤 Student Name</th>
+                                        <th>✅ Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success w-100 mt-3" id="submit-btn" style="display: none;">
+                                📩 Submit Attendance
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const classSelect = document.getElementById("class_id");
+    const sectionSelect = document.getElementById("section_id");
+    const studentTableContainer = document.getElementById("student-table-container");
+    const studentTableBody = document.getElementById("student-table-body");
+    const submitBtn = document.getElementById("submit-btn");
+    const loadingSpinner = document.getElementById("loading");
+
+    function fetchStudents() {
+        const classId = classSelect.value;
+        const sectionId = sectionSelect.value;
+
+        if (classId && sectionId) {
+            loadingSpinner.style.display = "block";
+            fetch(`/get_students?class_id=${classId}&section_id=${sectionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    studentTableBody.innerHTML = "";
+                    loadingSpinner.style.display = "none"; // Hide loading
+
+                    if (data.length > 0) {
+                        data.forEach(student => {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td>${student.name}</td>
+                                <td>
+                                    <select class="form-select" name="status_${student.id}">
+                                        <option value="Present">✅ Present</option>
+                                        <option value="Absent">❌ Absent</option>
+                                        <option value="Late">⏳ Late</option>
+                                    </select>
+                                </td>
+                            `;
+                            studentTableBody.appendChild(row);
+                        });
+                        studentTableContainer.style.display = "block";
+                        submitBtn.style.display = "block";
+                    } else {
+                        studentTableContainer.style.display = "none";
+                        submitBtn.style.display = "none";
+                    }
+                });
+        } else {
+            studentTableContainer.style.display = "none";
+            submitBtn.style.display = "none";
+        }
+    }
+
+    classSelect.addEventListener("change", fetchStudents);
+    sectionSelect.addEventListener("change", fetchStudents);
+});
+</script>
+{% endblock %}

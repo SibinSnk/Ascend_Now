@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-warning text-white text-center">
+                    <h3 class="mb-0">✏️ Edit Teacher</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('edit_teacher', teacher_id=teacher.id) }}" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ teacher.first_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ teacher.last_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">📧 Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ teacher.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">📞 Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" value="{{ teacher.phone }}" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">🔙 Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unauth_pages.css') }}">
+</head>
+<body>
+
+<div class="auth-container">
+    <h2>Register</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+        <input type="text" name="first_name" placeholder="Enter First Name" required>
+        <input type="text" name="last_name" placeholder="Enter Last Name" required>
+        <input type="email" name="email" placeholder="Enter Email" required>
+        <input type="number" name="phone" placeholder="Enter Phone Number" required>
+    
+        <select class="school-select" name="role" required>
+            <option value="">Select Role</option>
+            <option value="Admin">Admin</option>
+            <option value="Teacher">Teacher</option>
+        </select>
+
+        <select class="school-select" name="school_id" required>
+            <option value="">Select Your School</option>
+            {% for school in schools %}
+                <option value="{{ school.id }}">{{ school.name }}</option>
+            {% endfor %}
+        </select>
+    
+        <input type="password" name="password" placeholder="Enter Password" required>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+        <button type="submit">Register</button>
+    </form>
+
+    <a href="{{ url_for('dashboard_login') }}">Already have an account? Login here</a>
+</div>
+
+</body>
+</html>

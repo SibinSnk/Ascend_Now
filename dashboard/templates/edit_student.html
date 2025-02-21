@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">✏️ Edit Student</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('edit_student', student_id=student.id) }}" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ student.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ student.last_name }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="dob" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" value="{{ student.dob }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="Male" {% if student.gender == 'Male' %} selected {% endif %}>👦 Male</option>
+                                    <option value="Female" {% if student.gender == 'Female' %} selected {% endif %}>👧 Female</option>
+                                    <option value="Other" {% if student.gender == 'Other' %} selected {% endif %}>⚧ Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="admission_number" class="form-label">Admission Number</label>
+                                <input type="text" class="form-control" id="admission_number" name="admission_number" value="{{ student.admission_number }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="roll_number" class="form-label">Roll Number</label>
+                                <input type="text" class="form-control" id="roll_number" name="roll_number" value="{{ student.roll_number }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label for="parent_contact" class="form-label">Parent Contact</label>
+                            <input type="tel" class="form-control" id="parent_contact" name="parent_contact" value="{{ student.parent_contact }}" pattern="[0-9]{10}" required>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="class_id" class="form-label">Class</label>
+                                <select class="form-select" id="class_id" name="class_id" required>
+                                    {% for class in classes %}
+                                        <option value="{{ class.id }}" {% if student.class_id == class.id %} selected {% endif %}>{{ class.class_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="section_id" class="form-label">Section</label>
+                                <select class="form-select" id="section_id" name="section_id" required>
+                                    {% for section in sections %}
+                                        <option value="{{ section.id }}" {% if student.section_id == section.id %} selected {% endif %}>{{ section.section_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+
+{% endblock %}

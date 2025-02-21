@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row mt-5">
+        <div class="col-md-12 text-center">
+            <h3>📋 Parents List</h3>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-md-12 text-right">
+            <a href="{{ url_for('add_parent') }}" class="btn btn-primary">➕ Add Parent</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Linked Student</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parent in parents %}
+                        <tr>
+                            <td>{{ parent.id }}</td>
+                            <td>{{ parent.parent_name }}</td>
+                            <td>{{ parent.email }}</td>
+                            <td>{{ parent.phone }}</td>
+                            <td>{{ parent.student.first_name }} {{ parent.student.last_name }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_parent', parent_id=parent.id) }}" class="btn btn-warning btn-sm">✏️ Edit</a>
+                                <form action="{{ url_for('delete_parent', parent_id=parent.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this parent?');">🗑️ Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> 
+</div>
+{% endblock %}
