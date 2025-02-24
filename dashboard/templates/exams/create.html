@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Create New Exam</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('create_exam') }}">
+                        <div class="form-group">
+                            <label for="name">Exam Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="class_id">Class</label>
+                            <select class="form-control" id="class_id" name="class_id" required>
+                                <option value="">Select Class</option>
+                                {% for class_obj in classes %}
+                                    <option value="{{ class_obj.id }}">{{ class_obj.class_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="class_id">Section</label>
+                            <select class="form-control" id="section_id" name="section_id" required>
+                                <option value="">Select Section</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}">{{ section.section_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="exam_type">Exam Type</label>
+                            <select class="form-control" id="exam_type" name="exam_type" required>
+                                <option value="Midterm">Midterm</option>
+                                <option value="Final">Final</option>
+                                <option value="Quiz">Quiz</option>
+                                <option value="Assignment">Assignment</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="start_date">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="end_date">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group text-right">
+                            <a href="{{ url_for('exams') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Exam</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Validate that end date is after start date
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const startDate = new Date(document.getElementById('start_date').value);
+        const endDate = new Date(document.getElementById('end_date').value);
+        
+        if (endDate < startDate) {
+            e.preventDefault();
+            alert('End date must be after start date');
+        }
+    });
+</script>
+{% endblock %}

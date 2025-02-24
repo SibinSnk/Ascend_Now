@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>Exam: {{ exam.name }}</h2>
+            <p>Class: {{ exam.class.class_name }} | Type: {{ exam.exam_type }}</p>
+        </div>
+        <div class="col-md-6 text-right">
+            <div class="btn-group">
+                <a href="{{ url_for('exams') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Exams
+                </a>
+                <a href="{{ url_for('enter_marks', exam_id=exam.id) }}" class="btn btn-primary">
+                    <i class="fas fa-pen"></i> Enter Marks
+                </a>
+                <a href="{{ url_for('class_marks_report', class_id=exam.class_id) }}?exam_id={{ exam.id }}" class="btn btn-info">
+                    <i class="fas fa-chart-bar"></i> Class Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Exam Details</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Start Date:</strong> {{ exam.start_date.strftime('%d %b, %Y') }}</p>
+                    <p><strong>End Date:</strong> {{ exam.end_date.strftime('%d %b, %Y') }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Status:</strong>
+                        {% if exam.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Subjects:</strong> {{ subjects|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Results Summary</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            {% for subject in subjects %}
+                                <th>{{ subject.subject_name }}</th>
+                            {% endfor %}
+                            <th>Total</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student_id, result in results.items() %}
+                        <tr>
+                            <td>{{ result.student.roll_number }}</td>
+                            <td>{{ result.student.full_name }}</td>
+                            {% for subject in subjects %}
+                                <td>
+                                    {% if subject.id in result.subject_marks and result.subject_marks[subject.id] %}
+                                        {{ result.subject_marks[subject.id].marks_obtained }} / {{ result.subject_marks[subject.id].total_marks }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                            <td>{{ result.total_obtained }} / {{ result.total_possible }}</td>
+                            <td>{{ result.percentage }}%</td>
+                            <td>{{ result.grade }}</td>
+                            <td>
+                                <a href="{{ url_for('student_marks_report', student_id=result.student.id) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file-alt"></i> Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
