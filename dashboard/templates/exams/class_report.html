@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>Class Performance Report</h2>
+            <p>Class: {{ class_obj.class_name }}</p>
+        </div>
+        <div class="col-md-6 text-right">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Filter Options</h4>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('class_marks_report', class_id=class_obj.id) }}" id="filter-form">
+                <div class="form-row">
+                    <div class="form-group col-md-5">
+                        <label for="exam_id">Exam</label>
+                        <select class="form-control" id="exam_id" name="exam_id" required>
+                            <option value="">Select Exam</option>
+                            {% for exam_item in exams %}
+                                <option value="{{ exam_item.id }}" {% if selected_exam == exam_item.id %}selected{% endif %}>
+                                    {{ exam_item.name }} ({{ exam_item.exam_type }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-5">
+                        <label for="section_id">Section</label>
+                        <select class="form-control" id="section_id" name="section_id">
+                            <option value="">All Sections</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}" {% if selected_section == section.id %}selected{% endif %}>
+                                    {{ section.section_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_exam %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Performance Summary</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Students:</strong> {{ results|length }}</p>
+                    <p><strong>Class Average:</strong> {{ "%.2f"|format(class_average) }}%</p>
+                    
+                    {% set a_plus = results|selectattr('percentage', 'ge', 90)|list|length %}
+                    {% set a = results|selectattr('percentage', 'ge', 80)|selectattr('percentage', 'lt', 90)|list|length %}
+                    {% set b = results|selectattr('percentage', 'ge', 70)|selectattr('percentage', 'lt', 80)|list|length %}
+                    {% set c = results|selectattr('percentage', 'ge', 60)|selectattr('percentage', 'lt', 70)|list|length %}
+                    {% set d = results|selectattr('percentage', 'ge', 50)|selectattr('percentage', 'lt', 60)|list|length %}
+                    {% set f = results|selectattr('percentage', 'lt', 50)|list|length %}
+                    
+                    <p><strong>Grade Distribution:</strong></p>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            A+ (90-100%)
+                            <span class="badge badge-primary badge-pill">{{ a_plus }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            A (80-89%)
+                            <span class="badge badge-primary badge-pill">{{ a }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            B (70-79%)
+                            <span class="badge badge-primary badge-pill">{{ b }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            C (60-69%)
+                            <span class="badge badge-primary badge-pill">{{ c }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            D (50-59%)
+                            <span class="badge badge-primary badge-pill">{{ d }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            F (Below 50%)
+                            <span class="badge badge-danger badge-pill">{{ f }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Top 5 Students</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student Name</th>
+                                    <th>Roll No.</th>
+                                    <th>Total</th>
+                                    <th>Percentage</th>
+                                    <th>Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results[:5] %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ result.student.full_name }}</td>
+                                    <td>{{ result.student.roll_number }}</td>
+                                    <td>{{ result.total_obtained }} / {{ result.total_possible }}</td>
+                                    <td>{{ result.percentage }}%</td>
+                                    <td>{{ result.grade }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Complete Class Results</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Rank</th>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            <th>Total</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ result.student.roll_number }}</td>
+                            <td>{{ result.student.full_name }}</td>
+                            <td>{{ result.total_obtained }} / {{ result.total_possible }}</td>
+                            <td>{{ result.percentage }}%</td>
+                            <td>{{ result.grade }}</td>
+                            <td>
+                                <a href="{{ url_for('student_marks_report', student_id=result.student.id) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-file-alt"></i> Student Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Please select an exam to view class performance report.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @media print {
+        body {
+            padding: 20px;
+        }
+        .btn, .no-print, form {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #ddd !important;
+            margin-bottom: 20px !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            padding: 10px 15px !important;
+        }
+        .table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+        .table td, .table th {
+            border: 1px solid #ddd !important;
+            padding: 8px !important;
+        }
+    }
+</style>
+
+{% block scripts %}
+<script>
+    // Auto-submit form when exam or section changes
+    document.getElementById('exam_id').addEventListener('change', function() {
+        document.getElementById('filter-form').submit();
+    });
+    
+    document.getElementById('section_id').addEventListener('change', function() {
+        if (document.getElementById('exam_id').value) {
+            document.getElementById('filter-form').submit();
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

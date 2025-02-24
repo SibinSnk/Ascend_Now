@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>Enter Marks: {{ exam.name }} ({{ exam.exam_type }})</h2>
+            <p>Class: {{ exam.class.class_name }}</p>
+        </div>
+        <div class="col-md-6 text-right">
+            <a href="{{ url_for('view_exam', exam_id=exam.id) }}" class="btn btn-info">
+                <i class="fas fa-arrow-left"></i> Back to Exam
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Filter Options</h4>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('enter_marks', exam_id=exam.id) }}" id="filter-form">
+                <div class="form-row">
+                    <div class="form-group col-md-5">
+                        <label for="section_id">Section</label>
+                        <select class="form-control" id="section_id" name="section_id">
+                            <option value="">All Sections</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}" {% if selected_section == section.id %}selected{% endif %}>
+                                    {{ section.section_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-5">
+                        <label for="subject_id">Subject</label>
+                        <select class="form-control" id="subject_id" name="subject_id" required>
+                            <option value="">Select Subject</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject.id }}" {% if selected_subject == subject.id %}selected{% endif %}>
+                                    {{ subject.subject_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if selected_subject %}
+    <div class="card">
+        <div class="card-header">
+            <h4>Enter Marks</h4>
+            <p>Subject: {{ subjects|selectattr('id', 'equalto', selected_subject)|first|attr('subject_name') }}</p>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('enter_marks', exam_id=exam.id) }}">
+                <input type="hidden" name="subject_id" value="{{ selected_subject }}">
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student Name</th>
+                                <th>Marks Obtained</th>
+                                <th>Total Marks</th>
+                                <th>Percentage</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.roll_number }}</td>
+                                <td>{{ student.full_name }}</td>
+                                <td>
+                                    <input type="number" step="0.01" min="0" class="form-control marks-obtained" 
+                                           name="marks_obtained_{{ student.id }}" id="marks_obtained_{{ student.id }}"
+                                           value="{{ existing_marks.get(student.id).marks_obtained if student.id in existing_marks else '' }}" 
+                                           required>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" min="0" class="form-control total-marks" 
+                                           name="total_marks_{{ student.id }}" id="total_marks_{{ student.id }}"
+                                           value="{{ existing_marks.get(student.id).total_marks if student.id in existing_marks else '' }}" 
+                                           required>
+                                </td>
+                                <td>
+                                    <span id="percentage_{{ student.id }}">
+                                        {% if student.id in existing_marks %}
+                                            {{ "%.2f"|format(existing_marks.get(student.id).percentage) }}%
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span id="grade_{{ student.id }}">
+                                        {% if student.id in existing_marks %}
+                                            {{ existing_marks.get(student.id).grade }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="form-group text-right mt-3">
+                    <button type="submit" class="btn btn-primary">Save Marks</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Please select a subject to enter marks.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-submit form when section changes
+    document.getElementById('section_id').addEventListener('change', function() {
+        // Only submit if subject is also selected
+        if (document.getElementById('subject_id').value) {
+            document.getElementById('filter-form').submit();
+        }
+    });
+    
+    // Calculate percentage and grade on input change
+    document.querySelectorAll('.marks-obtained, .total-marks').forEach(function(input) {
+        input.addEventListener('input', function() {
+            const studentId = this.id.split('_')[2];
+            calculatePercentageAndGrade(studentId);
+        });
+    });
+    
+    function calculatePercentageAndGrade(studentId) {
+        const marksObtained = parseFloat(document.getElementById(`marks_obtained_${studentId}`).value) || 0;
+        const totalMarks = parseFloat(document.getElementById(`total_marks_${studentId}`).value) || 0;
+        
+        if (totalMarks > 0) {
+            const percentage = (marksObtained / totalMarks) * 100;
+            document.getElementById(`percentage_${studentId}`).textContent = percentage.toFixed(2) + '%';
+            
+            let grade = '';
+            if (percentage >= 90) grade = 'A+';
+            else if (percentage >= 80) grade = 'A';
+            else if (percentage >= 70) grade = 'B';
+            else if (percentage >= 60) grade = 'C';
+            else if (percentage >= 50) grade = 'D';
+            else grade = 'F';
+            
+            document.getElementById(`grade_${studentId}`).textContent = grade;
+        } else {
+            document.getElementById(`percentage_${studentId}`).textContent = '-';
+            document.getElementById(`grade_${studentId}`).textContent = '-';
+        }
+    }
+    
+    // Quick fill tool for total marks
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add button at the top of the form
+        const form = document.querySelector('form');
+        const table = document.querySelector('table');
+        
+        if (form && table) {
+            const div = document.createElement('div');
+            div.className = 'form-group mb-3';
+            div.innerHTML = `
+                <label for="common_total">Set same total marks for all students:</label>
+                <div class="input-group" style="max-width: 250px;">
+                    <input type="number" class="form-control" id="common_total" placeholder="Enter total marks">
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-secondary" id="apply_total">Apply</button>
+                    </div>
+                </div>
+            `;
+            
+            table.parentNode.insertBefore(div, table);
+            
+            // Add event listener to the button
+            document.getElementById('apply_total').addEventListener('click', function() {
+                const commonTotal = document.getElementById('common_total').value;
+                if (commonTotal) {
+                    document.querySelectorAll('.total-marks').forEach(function(input) {
+                        input.value = commonTotal;
+                        const studentId = input.id.split('_')[2];
+                        calculatePercentageAndGrade(studentId);
+                    });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
