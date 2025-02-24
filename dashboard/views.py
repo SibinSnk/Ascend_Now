@@ -469,3 +469,37 @@ def enter_marks():
     if request.method == 'POST':
         pass
     return render_template('marks.html', subjects=subjects, students=students)
+    
+
+@app.route('/enter_marks_bulk', methods=['GET', 'POST'])
+@login_required
+def enter_marks_bulk():
+    students = Student.query.all()
+    subjects = Subject.query.all()
+
+    if request.method == 'POST':
+        exam_type = request.form.get('exam_type')
+
+        # These will come in parallel lists, one entry per row in the table
+        student_ids = request.form.getlist('student_ids[]')
+        subject_ids = request.form.getlist('subject_ids[]')
+        marks_obtained = request.form.getlist('marks_obtained[]')
+        total_marks = request.form.getlist('total_marks[]')
+        
+        for i in range(len(student_ids)):
+            new_mark = Marks(
+                student_id=student_ids[i],
+                subject_id=subject_ids[i],
+                exam_type=exam_type,
+                marks_obtained=marks_obtained[i],
+                total_marks=total_marks[i],
+                grade='N/A'
+            )
+            db.session.add(new_mark)
+
+        db.session.commit()
+        flash("Marks successfully entered!", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('add_marks.html', students=students, subjects=subjects)
+    

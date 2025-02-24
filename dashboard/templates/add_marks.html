@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Enter Marks for All Students</h3>
+
+    <form method="POST" action="{{ url_for('enter_marks_bulk') }}">
+        <div class="form-group row">
+            <label for="exam_type" class="col-sm-2 col-form-label">Exam Type</label>
+            <div class="col-sm-10">
+                <select class="form-control" id="exam_type" name="exam_type" required>
+                    <option value="Midterm">Midterm</option>
+                    <option value="Final">Final</option>
+                    <option value="Quiz">Quiz</option>
+                    <option value="Assignment">Assignment</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Total Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        {% for subject in subjects %}
+                            <tr>
+                                <td>
+                                    {{ student.first_name }} {{ student.last_name }}
+                                    <input type="hidden" name="student_ids[]" value="{{ student.id }}">
+                                </td>
+                                <td>
+                                    {{ subject.subject_name }}
+                                    <input type="hidden" name="subject_ids[]" value="{{ subject.id }}">
+                                </td>
+                                <td>
+                                    <input type="number" name="marks_obtained[]" class="form-control" required>
+                                </td>
+                                <td>
+                                    <input type="number" name="total_marks[]" class="form-control" required>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block mt-4">Save Marks</button>
+    </form>
+</div>
+
+{% endblock %}

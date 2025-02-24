@@ -102,3 +102,10 @@ class Parent(db.Model):
     parent_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
+
+class Exams(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=False)
+    exam_type = db.Column(db.Enum('Midterm', 'Final', 'Quiz', 'Assignment', name="exam_types"), nullable=False)
+    exam_date = db.Column(db.Date, nullable=False)
+    subject = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
