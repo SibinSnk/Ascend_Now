@@ -1,11 +1,11 @@
+import os
+from datetime import timedelta
+
 from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from datetime import timedelta
-import os
-
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
@@ -23,8 +23,8 @@ migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 
 
-from dashboard.models import *
 from dashboard import views
+from dashboard.models import *
 from dashboard.models import User
 
 login_manager = LoginManager()

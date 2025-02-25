@@ -1,5 +1,7 @@
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional, List
+
 
 class ListData(BaseModel):
     header_text: str = Field(..., description="The header text for the list of options, must not exceed 20 characters.")

@@ -1,6 +1,5 @@
 import google.generativeai as genai
 
-
 prompt = """You are an agent designed to interact with a School SQL database.
 Given an input question, create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
 Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most {top_k} results.

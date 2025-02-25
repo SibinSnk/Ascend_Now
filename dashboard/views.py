@@ -1,11 +1,16 @@
-from flask import render_template, redirect, flash, url_for, request, get_flashed_messages,jsonify
-from dashboard.helpers import register_validations
-from flask_login import login_user, login_required, logout_user, current_user
-from email_validator import validate_email, EmailNotValidError
-from dashboard import app,bcrypt,db
-from dashboard.models import *
-from datetime import datetime
+import os
 import re
+from datetime import datetime
+
+from email_validator import EmailNotValidError, validate_email
+from flask import (current_app, flash, get_flashed_messages, jsonify, redirect,
+                   render_template, request, url_for)
+from flask_login import current_user, login_required, login_user, logout_user
+from weasyprint import HTML
+
+from dashboard import app, bcrypt, db
+from dashboard.helpers import register_validations
+from dashboard.models import *
 
 
 @app.route("/",methods=['GET', 'POST'])
@@ -748,3 +753,75 @@ def class_marks_report(class_id):
                           subjects=subjects,
                           results=results,
                           class_average=class_average)
+
+
+
+
+
+def generate_student_report(student_id, exam_id):
+    """
+    Generate a professionally styled PDF report card for a student
+    
+    Args:
+        student_id (int): The ID of the student
+        exam_id (int): The ID of the exam
+    
+    Returns:
+        str: Path to the generated PDF file
+    """
+    # Get student information
+    student = Student.query.get_or_404(student_id)
+    
+    # Get exam information
+    exam = Exam.query.get_or_404(exam_id)
+    
+    # Get marks for this student in this exam
+    marks = Mark.query.filter_by(student_id=student_id, exam_id=exam_id).all()
+    
+    # For each mark, ensure we have the subject name
+    for mark in marks:
+        mark.subject = Subject.query.get(mark.subject_id)
+    
+    # Calculate total marks and percentage
+    total_obtained, total_possible, percentage = student.calculate_total_marks(exam_id)
+    
+    # Get student's class and section
+    class_info = Class.query.get(student.class_id)
+    section_info = Section.query.get(student.section_id)
+    
+    # Get school information
+    school = School.query.get(student.school_id)
+    
+    # Format the date
+    report_date = datetime.now().strftime("%B %d, %Y")
+    
+    # Prepare context for the template
+    context = {
+        'student': student,
+        'exam': exam,
+        'marks': marks,
+        'total_obtained': total_obtained,
+        'total_possible': total_possible,
+        'percentage': percentage,
+        'class_info': class_info,
+        'section_info': section_info,
+        'school': school,
+        'report_date': report_date,
+        'grade': Mark.calculate_grade(percentage)
+    }
+    
+    # Render the HTML template with the context
+    html_content = render_template('student_report.html', **context)
+    
+    # Create reports directory if it doesn't exist
+    reports_dir = os.path.join(current_app.instance_path, 'reports')
+    os.makedirs(reports_dir, exist_ok=True)
+    
+    # Generate PDF filename
+    filename = f"report_{student.admission_number}_{exam.name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+    pdf_path = os.path.join(reports_dir, filename)
+    
+    # Generate PDF
+    HTML(string=html_content).write_pdf(pdf_path)
+    
+    return pdf_path

@@ -1,6 +1,8 @@
 import os
-from dashboard import app
+
 from dotenv import load_dotenv
+
+from dashboard import app
 
 load_dotenv()
 

@@ -1,9 +1,12 @@
-from email_validator import validate_email, EmailNotValidError
-from flask import flash,redirect,url_for
-from dashboard.models import *
-import re
 import os
+import re
+
 import requests
+from email_validator import EmailNotValidError, validate_email
+from flask import flash, redirect, url_for
+
+from dashboard.models import *
+
 
 def register_validations(email,password,confirm_password,phone,role):
     try:
