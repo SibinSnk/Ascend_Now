@@ -33,7 +33,6 @@
         </div>
     </div>
 
-    <!-- List of Schools with Classes and Sections -->
     <div class="card shadow-lg">
         <div class="card-header bg-info text-white">
             <h4 class="mb-0">🏫 Schools</h4>
@@ -60,7 +59,6 @@
                                 <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); addClass({{ school.id }})" data-bs-toggle="tooltip" title="Add a new class to this school">➕ Add Class</button>
                             </td>
                         </tr>
-                        <!-- Classes for this school -->
                         <tr class="collapse" id="classes-{{ school.id }}">
                             <td colspan="5">
                                 <table class="table table-bordered">
@@ -78,7 +76,6 @@
                                                     <button class="btn btn-sm btn-success" onclick="event.stopPropagation(); addSection({{ class.id }})" data-bs-toggle="tooltip" title="Add a new section to this class">➕ Add Section</button>
                                                 </td>
                                             </tr>
-                                            <!-- Sections for this class -->
                                             <tr class="collapse" id="sections-{{ class.id }}">
                                                 <td colspan="2">
                                                     <table class="table table-bordered">
@@ -109,7 +106,6 @@
     </div>
 </div>
 
-<!-- Modals for Adding Class and Section -->
 <div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -163,35 +159,24 @@
 </div>
 
 <script>
-// Function to add a class to a school
 function addClass(schoolId) {
-    // Set the school_id in the hidden field
     document.getElementById('school_id').value = schoolId;
-    // Show the modal
     new bootstrap.Modal(document.getElementById('addClassModal')).show();
-    // Prevent event bubbling
     event.stopPropagation();
 }
 
-// Function to add a section to a class
 function addSection(classId) {
-    // Set the class_id in the hidden field
     document.getElementById('class_id').value = classId;
-    // Show the modal
     new bootstrap.Modal(document.getElementById('addSectionModal')).show();
-    // Prevent event bubbling
     event.stopPropagation();
 }
 
-// Initialize tooltips and popovers
 document.addEventListener('DOMContentLoaded', function() {
-    // Enable all tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
-    // Add form validation
     const forms = document.querySelectorAll('.needs-validation');
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', event => {
@@ -203,11 +188,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }, false);
     });
 
-    // Enhance the UI with dynamic row highlighting
     const schoolRows = document.querySelectorAll('[data-bs-toggle="collapse"][aria-controls^="classes-"]');
     schoolRows.forEach(row => {
         row.addEventListener('click', function() {
-            // Toggle active class for the clicked row
             this.classList.toggle('table-active');
         });
     });
@@ -215,18 +198,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const classRows = document.querySelectorAll('[data-bs-toggle="collapse"][aria-controls^="sections-"]');
     classRows.forEach(row => {
         row.addEventListener('click', function() {
-            // Toggle active class for the clicked row
             this.classList.toggle('table-info');
         });
     });
 
-    // Function to refresh the page after form submission
     const addClassForm = document.getElementById('addClassForm');
     const addSectionForm = document.getElementById('addSectionForm');
     
     if (addClassForm) {
         addClassForm.addEventListener('submit', function() {
-            // Add a small delay before refreshing to allow the server to process
             setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -235,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (addSectionForm) {
         addSectionForm.addEventListener('submit', function() {
-            // Add a small delay before refreshing to allow the server to process
             setTimeout(() => {
                 window.location.reload();
             }, 500);

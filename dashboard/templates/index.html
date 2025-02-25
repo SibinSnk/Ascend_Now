@@ -1,33 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row text-center">
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
         {% if user_role == 'Admin' %}
-        <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-body">
-                    <h5 class="card-title">👨‍🏫 Teachers</h5>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card shadow-lg border-0 rounded-3 h-100">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Teachers Image" onerror="this.style.display='none'">
+                </div>
+                <div class="card-body text-center p-4">
+                    <h3 class="card-title">👨‍🏫 Teachers</h3>
                     <p class="card-text">Manage teachers and their details.</p>
-                    <a href="{{ url_for('view_teachers') }}" class="btn btn-primary"> View Teachers Details</a><br>
+                    <a href="{{ url_for('view_teachers') }}" class="btn btn-primary btn-lg">View Teachers</a>
                 </div>
             </div>
         </div>
         {% endif %}
-        <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-body">
-                    <h5 class="card-title">🎓 Students</h5>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card shadow-lg border-0 rounded-3 h-100">
+                <div class="card-img-container">
+                    <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?w=800&q=80" class="card-img-top" alt="Students in a classroom" onerror="this.style.display='none'">
+                </div>
+                <div class="card-body text-center p-4">
+                    <h3 class="card-title">🎓 Students</h3>
                     <p class="card-text">Manage students and their details.</p>
-                    <a href="{{ url_for('view_students') }}" class="btn btn-primary"> View Students Details</a><br>
+                    <a href="{{ url_for('view_students') }}" class="btn btn-success btn-lg">View Students</a>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-body">
-                    <h5 class="card-title">👨‍👩‍👧 Parents</h5>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card shadow-lg border-0 rounded-3 h-100">
+                <div class="card-img-container">
+                    <img src="https://media.istockphoto.com/id/1570178815/photo/father-helping-son-with-homework.jpg?s=612x612&w=0&k=20&c=_y5MKRU76jlPFX45x1_i7gD1yQq-BxUha2osC5xa9Oc=" class="card-img-top" alt="Parents teaching children" onerror="this.style.display='none'">
+                </div>
+                <div class="card-body text-center p-4">
+                    <h3 class="card-title">👨‍👩‍👧 Parents</h3>
                     <p class="card-text">Manage parents and their details.</p>
-                    <a href="{{ url_for('view_parents') }}" class="btn btn-primary"> View Parents Details</a><br>
+                    <a href="{{ url_for('view_parents') }}" class="btn btn-info btn-lg">View Parents</a>
                 </div>
             </div>
         </div>
