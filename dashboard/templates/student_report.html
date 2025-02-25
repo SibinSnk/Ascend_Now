@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Student Report - {{ student.full_name }}</title>
+        <style>
+            /* Reset & base styles for modern single-page report */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: 'Poppins', 'Segoe UI', sans-serif;
+                background-color: #f0f2f5;
+                color: #333;
+                padding: 0;
+                line-height: 1.4;
+                font-size: 14px; /* Reduced font size for better fit */
+            }
+            .container {
+                background-color: #fff;
+                width: 210mm; /* A4 width */
+                height: 297mm; /* A4 height */
+                margin: 0 auto;
+                overflow: hidden;
+                position: relative;
+                box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+            }
+            .header-bg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 220px;
+                background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+                clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+                z-index: 1;
+            }
+            .header-decoration {
+                position: absolute;
+                width: 300px;
+                height: 300px;
+                background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+                border-radius: 50%;
+                top: -150px;
+                right: -100px;
+                z-index: 2;
+            }
+            header {
+                position: relative;
+                color: #fff;
+                padding: 25px 40px;
+                z-index: 10;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            .header-left h1 {
+                font-size: 28px;
+                margin-bottom: 5px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }
+            .header-left p {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+            .content {
+                padding: 20px 40px;
+                position: relative;
+                z-index: 5;
+            }
+            .two-columns {
+                display: flex;
+                gap: 30px;
+                margin-bottom: 20px;
+            }
+            .column {
+                flex: 1;
+            }
+            .student-info, .exam-info {
+                background-color: #fff;
+                border-radius: 8px;
+                padding: 15px 20px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+                margin-bottom: 15px;
+            }
+            h2 {
+                color: #3a7bd5;
+                font-size: 16px;
+                margin-bottom: 12px;
+                font-weight: 600;
+                position: relative;
+                padding-left: 15px;
+            }
+            h2::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 6px;
+                height: 16px;
+                background-color: #3a7bd5;
+                border-radius: 3px;
+            }
+            .detail-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .detail {
+                padding: 5px 0;
+            }
+            .detail strong {
+                color: #666;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: block;
+                margin-bottom: 2px;
+            }
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin-top: 5px;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            }
+            th, td {
+                padding: 10px 12px;
+                text-align: left;
+            }
+            th {
+                background-color: #f1f5f9;
+                font-weight: 600;
+                color: #555;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+            td {
+                border-bottom: 1px solid #f1f5f9;
+            }
+            tr:last-child td {
+                border-bottom: none;
+            }
+            tr:nth-child(even) {
+                background-color: #fcfdfe;
+            }
+
+            /* Modern progress display */
+            .performance-section {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                background-color: #fff;
+                border-radius: 8px;
+                padding: 15px 20px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+                margin-top: 15px;
+            }
+            .progress-container {
+                position: relative;
+                width: 120px;
+                height: 120px;
+                flex-shrink: 0;
+            }
+            .progress-circle {
+                transform: rotate(-90deg);
+                width: 100%;
+                height: 100%;
+            }
+            .progress-circle circle {
+                fill: none;
+                stroke-width: 10;
+                stroke-linecap: round;
+                r: 50;
+                cx: 60;
+                cy: 60;
+            }
+            .progress-circle .bg {
+                stroke: #f1f5f9;
+            }
+            .progress-circle .progress {
+                stroke: #3a7bd5;
+                stroke-dasharray: 314.16; /* 2 * π * 50 */
+                stroke-dashoffset: calc(314.16 - (314.16 * {{ percentage }}) / 100);
+            }
+            .progress-text {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 24px;
+                font-weight: 700;
+                color: #3a7bd5;
+            }
+            .performance-details {
+                flex: 1;
+            }
+            .performance-details h3 {
+                font-size: 18px;
+                color: #3a7bd5;
+                margin-bottom: 15px;
+            }
+            .grades-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .grade-item {
+                padding: 8px 12px;
+                background-color: #f8fafc;
+                border-radius: 6px;
+                flex: 1;
+                text-align: center;
+            }
+            .grade-item strong {
+                display: block;
+                font-size: 11px;
+                color: #666;
+                text-transform: uppercase;
+                margin-bottom: 2px;
+            }
+            .grade-badge {
+                display: inline-block;
+                padding: 3px 10px;
+                border-radius: 20px;
+                background-color: #3a7bd5;
+                color: white;
+                font-weight: 600;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+            
+            footer {
+                text-align: center;
+                font-size: 12px;
+                padding: 10px 0;
+                color: #777;
+                background-color: #f8fafc;
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                border-top: 1px solid #eee;
+            }
+            
+            /* Print styles to ensure single page */
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            @media print {
+                body {
+                    background: none;
+                }
+                .container {
+                    width: 100%;
+                    height: 100%;
+                    box-shadow: none;
+                    margin: 0;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header-bg"></div>
+            <div class="header-decoration"></div>
+            <header>
+                <div class="header-left">
+                    <h1>Student Report Card</h1>
+                    <p>Report Date: {{ report_date }}</p>
+                </div>
+            </header>
+            <div class="content">
+                <div class="two-columns">
+                    <div class="column">
+                        <section class="student-info">
+                            <h2>Student Details</h2>
+                            <div class="detail-grid">
+                                <div class="detail"><strong>Name</strong> {{ student.full_name }}</div>
+                                <div class="detail"><strong>Admission No</strong> {{ student.admission_number }}</div>
+                                <div class="detail"><strong>Class</strong> {{ class_info.class_name if class_info.class_name else 'N/A' }}</div>
+                                <div class="detail"><strong>Section</strong> {{ section_info.section_name if section_info.section_name else 'N/A' }}</div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="column">
+                        <section class="exam-info">
+                            <h2>Exam Details</h2>
+                            <div class="detail-grid">
+                                <div class="detail"><strong>Exam</strong> {{ exam.name }}</div>
+                                <div class="detail"><strong>Exam Type</strong> {{ exam.exam_type.title() }}</div>
+                                <div class="detail"><strong>Academic Year</strong> 2024-2025</div>
+                                <div class="detail"><strong>Term</strong> Term I</div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <section class="marks-info">
+                    <h2>Academic Performance</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Marks Obtained</th>
+                                <th>Total Marks</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mark in marks %}
+                            <tr>
+                                <td>{{ mark.subject.subject_name if mark.subject.subject_name else 'N/A' }}</td>
+                                <td>{{ mark.marks_obtained }}</td>
+                                <td>{{ mark.total_marks }}</td>
+                                <td>{{ mark.grade }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+                
+                <section class="performance-section">
+                    <div class="progress-container">
+                        <svg class="progress-circle" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="progress-text">{{ percentage }}%</div>
+                    </div>
+                    <div class="performance-details">
+                        <h3>Overall Performance</h3>
+                        <div class="grades-row">
+                            <div class="grade-item">
+                                <strong>Total Obtained</strong>
+                                <div>{{ total_obtained }}</div>
+                            </div>
+                            <div class="grade-item">
+                                <strong>Total Possible</strong>
+                                <div>{{ total_possible }}</div>
+                            </div>
+                            <div class="grade-item">
+                                <strong>Grade</strong>
+                                <div>{{ grade }}</div>
+                                <div class="grade-badge">{{ grade }}</div>
+                            </div>
+                        </div>
+                        <div class="grade-item">
+                            <strong>Teacher's Remarks</strong>
+                            <div>{{ remarks if remarks else 'Good performance overall. Keep up the good work!' }}</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <footer>
+                <p>&copy; School Name. All rights reserved.</p>
+            </footer>
+        </div>
+    </body>
+</html>

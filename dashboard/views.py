@@ -807,8 +807,10 @@ def generate_student_report(student_id, exam_id):
         'section_info': section_info,
         'school': school,
         'report_date': report_date,
-        'grade': Mark.calculate_grade(percentage)
+        'grade': Mark.calculate_grade(percentage),
+
     }
+    print(context)
     
     # Render the HTML template with the context
     html_content = render_template('student_report.html', **context)
