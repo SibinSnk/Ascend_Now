@@ -398,14 +398,17 @@ def delete_parent(parent_id):
 @app.route('/dashboard/teachers', methods=['GET', 'POST'])
 @login_required
 def view_teachers():
-    teachers = User.query.filter_by(role='Teacher').all()
-    return render_template("view_teachers.html",teachers=teachers)
+    if current_user.role == 'Admin':
+        teachers = User.query.filter_by(role='Teacher').all()
+        return render_template("view_teachers.html",teachers=teachers)
+    
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/dashboard/students', methods=['GET', 'POST'])
 @login_required
 def view_students():
-    students = Student.query.all()
+    students = Student.query.filter_by(school_id=current_user.school_id).all()
     return render_template("view_students.html",students=students)
 
 
@@ -461,52 +464,7 @@ def get_students():
 
     return jsonify(student_list)
 
-
-
-# @app.route('/enter_marks', methods=['GET', 'POST'])
-# @login_required
-# def enter_marks():
-#     subjects = Subject.query.all()
-#     students = Student.query.all()
-#     if request.method == 'POST':
-#         pass
-#     return render_template('marks.html', subjects=subjects, students=students)
-    
-
-# @app.route('/enter_marks_bulk', methods=['GET', 'POST'])
-# @login_required
-# def enter_marks_bulk():
-#     students = Student.query.all()
-#     subjects = Subject.query.all()
-
-#     if request.method == 'POST':
-#         exam_type = request.form.get('exam_type')
-
-#         # These will come in parallel lists, one entry per row in the table
-#         student_ids = request.form.getlist('student_ids[]')
-#         subject_ids = request.form.getlist('subject_ids[]')
-#         marks_obtained = request.form.getlist('marks_obtained[]')
-#         total_marks = request.form.getlist('total_marks[]')
-        
-#         for i in range(len(student_ids)):
-#             new_mark = Mark(
-#                 student_id=student_ids[i],
-#                 subject_id=subject_ids[i],
-#                 exam_type=exam_type,
-#                 marks_obtained=marks_obtained[i],
-#                 total_marks=total_marks[i],
-#                 grade='N/A'
-#             )
-#             db.session.add(new_mark)
-
-#         db.session.commit()
-#         flash("Marks successfully entered!", "success")
-#         return redirect(url_for('dashboard'))
-
-#     return render_template('add_marks.html', students=students, subjects=subjects)
-    
-
-#########################################################
+#####################################
 
 
 @app.route('/exams', methods=['GET'])
@@ -792,7 +750,6 @@ def generate_student_report(student_id, exam_id):
         'grade': Mark.calculate_grade(percentage),
 
     }
-    print(context)
     
     html_content = render_template('student_report.html', **context)
     reports_dir = os.path.join(current_app.instance_path, 'reports')
@@ -809,7 +766,7 @@ def generate_student_report(student_id, exam_id):
 def school_management():
     if current_user.role != 'Admin':
         flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     schools = School.query.all()
     return render_template('admin/school_management.html', schools=schools)
@@ -820,7 +777,7 @@ def school_management():
 def add_school():
     if current_user.role != 'Admin':
         flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     name = request.form['name']
     address = request.form['address']
@@ -861,7 +818,7 @@ def get_sections():
 def add_class():
     if current_user.role != 'Admin':
         flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     school_id = request.form['school_id']
     class_name = request.form['class_name']
@@ -892,7 +849,7 @@ def add_class():
 def add_section():
     if current_user.role != 'Admin':
         flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
 
     class_id = request.form['class_id']
     section_name = request.form['section_name']

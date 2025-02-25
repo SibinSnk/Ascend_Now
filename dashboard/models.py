@@ -1,5 +1,4 @@
 from flask_login import UserMixin
-
 from dashboard import db
 
 
@@ -114,7 +113,6 @@ class Attendance(db.Model):
 
 
 class Exam(db.Model):
-    """Updated from Exams to Exam for consistency"""
     id = db.Column(db.Integer, primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey('class.id'), nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
@@ -130,7 +128,6 @@ class Exam(db.Model):
 
 
 class Mark(db.Model):
-    """Updated from Marks to Mark for consistency"""
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
