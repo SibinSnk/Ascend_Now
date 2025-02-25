@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>Student Report Card</h2>
+        </div>
+        <div class="col-md-6 text-right">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Student Details</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ student.full_name }}</p>
+                    <p><strong>Class:</strong> {{ student.class.class_name }}</p>
+                    <p><strong>Section:</strong> {{ student.section.section_name }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Roll Number:</strong> {{ student.roll_number }}</p>
+                    <p><strong>Admission Number:</strong> {{ student.admission_number }}</p>
+                    <p><strong>Gender:</strong> {{ student.gender }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for exam in exams %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>{{ exam.name }} ({{ exam.exam_type }})</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Subject</th>
+                            <th>Marks Obtained</th>
+                            <th>Total Marks</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in subjects %}
+                            <tr>
+                                <td>{{ subject.subject_name }}</td>
+                                {% if subject.id in marks_by_exam[exam.id].subject_marks and marks_by_exam[exam.id].subject_marks[subject.id] %}
+                                    <td>{{ marks_by_exam[exam.id].subject_marks[subject.id].marks_obtained }}</td>
+                                    <td>{{ marks_by_exam[exam.id].subject_marks[subject.id].total_marks }}</td>
+                                    <td>{{ "%.2f"|format(marks_by_exam[exam.id].subject_marks[subject.id].percentage) }}%</td>
+                                    <td>{{ marks_by_exam[exam.id].subject_marks[subject.id].grade }}</td>
+                                {% else %}
+                                    <td colspan="4" class="text-center">Not Available</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-light">
+                            <th>Total</th>
+                            <th>{{ marks_by_exam[exam.id].total_obtained }}</th>
+                            <th>{{ marks_by_exam[exam.id].total_possible }}</th>
+                            <th>{{ marks_by_exam[exam.id].percentage }}%</th>
+                            <th>{{ marks_by_exam[exam.id].grade }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Overall Performance</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Marks Summary</h5>
+                            <p><strong>Total Marks Obtained:</strong> {{ overall_obtained }} / {{ overall_possible }}</p>
+                            <p><strong>Overall Percentage:</strong> {{ overall_percentage }}%</p>
+                            <p><strong>Overall Grade:</strong> {{ overall_grade }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Teacher's Remarks</h5>
+                            <p>
+                                {% if overall_percentage >= 90 %}
+                                    Excellent performance! Keep up the outstanding work.
+                                {% elif overall_percentage >= 80 %}
+                                    Very good performance. Continue working hard.
+                                {% elif overall_percentage >= 70 %}
+                                    Good performance. There's room for improvement.
+                                {% elif overall_percentage >= 60 %}
+                                    Satisfactory performance. Need to focus more on studies.
+                                {% else %}
+                                    Needs significant improvement. Please pay more attention to studies.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        body {
+            padding: 20px;
+        }
+        .btn, .no-print {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #ddd !important;
+            margin-bottom: 20px !important;
+        }
+        .card-header {
+            background-color: #f8f9fa !important;
+            padding: 10px 15px !important;
+        }
+        .table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+        .table td, .table th {
+            border: 1px solid #ddd !important;
+            padding: 8px !important;
+        }
+    }
+</style>
+{% endblock %}

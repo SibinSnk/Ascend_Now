@@ -9,7 +9,7 @@
 
     <div class="row mb-3">
         <div class="col-md-12 text-right">
-            <a href="{{ url_for('add_student') }}" class="btn btn-primary">➕ Add Student</a>
+            <a href="{{ url_for('add_student') }}" class="btn btn-primary"> Add Student</a>
         </div>
     </div>
 
@@ -42,7 +42,7 @@
                             <td>{{ student.roll_number }}</td>
                             <td>{{ student.parent_contact }}</td>
                             <td>
-                                <a href="{{ url_for('enter_marks', id=student.id) }}" class="btn btn-info btn-sm">📊 Update</a>
+                                <a href="{{ url_for('exams') }}" class="btn btn-info btn-sm">📊 Exams</a>
                             </td>
                             <td>
                                 <a href="{{ url_for('view_attendance', student_id=student.id) }}" class="btn btn-info btn-sm">📊 View Attendance</a>
