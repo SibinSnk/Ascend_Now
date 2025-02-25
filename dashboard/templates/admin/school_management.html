@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">🏫 School Management</h1>
+
+    <!-- Add School Form -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">➕ Add School</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_school') }}" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="name" class="form-label">📛 School Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="address" class="form-label">📍 Address</label>
+                    <input type="text" class="form-control" id="address" name="address" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contact_number" class="form-label">📞 Contact Number</label>
+                    <input type="text" class="form-control" id="contact_number" name="contact_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">📧 Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success w-100">➕ Add School</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- List of Schools with Classes and Sections -->
+    <div class="card shadow-lg">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">🏫 Schools</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>📛 Name</th>
+                        <th>📍 Address</th>
+                        <th>📞 Contact</th>
+                        <th>📧 Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for school in schools %}
+                        <tr data-bs-toggle="collapse" data-bs-target="#classes-{{ school.id }}" aria-expanded="false" aria-controls="classes-{{ school.id }}">
+                            <td>{{ school.name }}</td>
+                            <td>{{ school.address }}</td>
+                            <td>{{ school.contact_number }}</td>
+                            <td>{{ school.email }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); addClass({{ school.id }})" data-bs-toggle="tooltip" title="Add a new class to this school">➕ Add Class</button>
+                            </td>
+                        </tr>
+                        <!-- Classes for this school -->
+                        <tr class="collapse" id="classes-{{ school.id }}">
+                            <td colspan="5">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>📚 Class Name</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for class in school.classes %}
+                                            <tr data-bs-toggle="collapse" data-bs-target="#sections-{{ class.id }}" aria-expanded="false" aria-controls="sections-{{ class.id }}">
+                                                <td>{{ class.class_name }}</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success" onclick="event.stopPropagation(); addSection({{ class.id }})" data-bs-toggle="tooltip" title="Add a new section to this class">➕ Add Section</button>
+                                                </td>
+                                            </tr>
+                                            <!-- Sections for this class -->
+                                            <tr class="collapse" id="sections-{{ class.id }}">
+                                                <td colspan="2">
+                                                    <table class="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>📖 Section Name</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for section in class.sections %}
+                                                                <tr>
+                                                                    <td>{{ section.section_name }}</td>
+                                                                </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for Adding Class and Section -->
+<div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addClassModalLabel">➕ Add Class</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addClassForm" method="POST" action="{{ url_for('add_class') }}" class="needs-validation" novalidate>
+                    <input type="hidden" id="school_id" name="school_id">
+                    <div class="mb-3">
+                        <label for="class_name" class="form-label">📖 Class Name</label>
+                        <input type="text" class="form-control" id="class_name" name="class_name" required>
+                        <div class="invalid-feedback">
+                            Please provide a class name.
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success w-100">➕ Add Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSectionModalLabel">➕ Add Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSectionForm" method="POST" action="{{ url_for('add_section') }}" class="needs-validation" novalidate>
+                    <input type="hidden" id="class_id" name="class_id">
+                    <div class="mb-3">
+                        <label for="section_name" class="form-label">📖 Section Name</label>
+                        <input type="text" class="form-control" id="section_name" name="section_name" required>
+                        <div class="invalid-feedback">
+                            Please provide a section name.
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success w-100">➕ Add Section</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Function to add a class to a school
+function addClass(schoolId) {
+    // Set the school_id in the hidden field
+    document.getElementById('school_id').value = schoolId;
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('addClassModal')).show();
+    // Prevent event bubbling
+    event.stopPropagation();
+}
+
+// Function to add a section to a class
+function addSection(classId) {
+    // Set the class_id in the hidden field
+    document.getElementById('class_id').value = classId;
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('addSectionModal')).show();
+    // Prevent event bubbling
+    event.stopPropagation();
+}
+
+// Initialize tooltips and popovers
+document.addEventListener('DOMContentLoaded', function() {
+    // Enable all tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Add form validation
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Enhance the UI with dynamic row highlighting
+    const schoolRows = document.querySelectorAll('[data-bs-toggle="collapse"][aria-controls^="classes-"]');
+    schoolRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Toggle active class for the clicked row
+            this.classList.toggle('table-active');
+        });
+    });
+    
+    const classRows = document.querySelectorAll('[data-bs-toggle="collapse"][aria-controls^="sections-"]');
+    classRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Toggle active class for the clicked row
+            this.classList.toggle('table-info');
+        });
+    });
+
+    // Function to refresh the page after form submission
+    const addClassForm = document.getElementById('addClassForm');
+    const addSectionForm = document.getElementById('addSectionForm');
+    
+    if (addClassForm) {
+        addClassForm.addEventListener('submit', function() {
+            // Add a small delay before refreshing to allow the server to process
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        });
+    }
+    
+    if (addSectionForm) {
+        addSectionForm.addEventListener('submit', function() {
+            // Add a small delay before refreshing to allow the server to process
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        });
+    }
+});
+</script>
+{% endblock %}

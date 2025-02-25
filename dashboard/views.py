@@ -42,10 +42,7 @@ def dashboard():
     if not current_user.is_authenticated:
         return redirect(url_for('dashboard_login'))
     
-    teachers = User.query.filter_by(role='Teacher').all()
-    students = Student.query.all()
-    parents = Parent.query.all()
-    return render_template('index.html', teachers=teachers, students=students, parents=parents)
+    return render_template('index.html', user_role=current_user.role)
 
 
 @app.route('/logout')
@@ -769,33 +766,18 @@ def generate_student_report(student_id, exam_id):
     Returns:
         str: Path to the generated PDF file
     """
-    # Get student information
+
     student = Student.query.get_or_404(student_id)
-    
-    # Get exam information
     exam = Exam.query.get_or_404(exam_id)
-    
-    # Get marks for this student in this exam
     marks = Mark.query.filter_by(student_id=student_id, exam_id=exam_id).all()
-    
-    # For each mark, ensure we have the subject name
     for mark in marks:
         mark.subject = Subject.query.get(mark.subject_id)
-    
-    # Calculate total marks and percentage
+
     total_obtained, total_possible, percentage = student.calculate_total_marks(exam_id)
-    
-    # Get student's class and section
     class_info = Class.query.get(student.class_id)
     section_info = Section.query.get(student.section_id)
-    
-    # Get school information
     school = School.query.get(student.school_id)
-    
-    # Format the date
     report_date = datetime.now().strftime("%B %d, %Y")
-    
-    # Prepare context for the template
     context = {
         'student': student,
         'exam': exam,
@@ -812,18 +794,125 @@ def generate_student_report(student_id, exam_id):
     }
     print(context)
     
-    # Render the HTML template with the context
     html_content = render_template('student_report.html', **context)
-    
-    # Create reports directory if it doesn't exist
     reports_dir = os.path.join(current_app.instance_path, 'reports')
     os.makedirs(reports_dir, exist_ok=True)
-    
-    # Generate PDF filename
     filename = f"report_{student.admission_number}_{exam.name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
     pdf_path = os.path.join(reports_dir, filename)
-    
-    # Generate PDF
     HTML(string=html_content).write_pdf(pdf_path)
     
     return pdf_path
+
+
+@app.route('/school-management')
+@login_required
+def school_management():
+    if current_user.role != 'Admin':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('index'))
+
+    schools = School.query.all()
+    return render_template('admin/school_management.html', schools=schools)
+
+
+@app.route('/add-school', methods=['POST'])
+@login_required
+def add_school():
+    if current_user.role != 'Admin':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('index'))
+
+    name = request.form['name']
+    address = request.form['address']
+    contact_number = request.form['contact_number']
+    email = request.form['email']
+
+    new_school = School(name=name, address=address, contact_number=contact_number, email=email)
+    db.session.add(new_school)
+    db.session.commit()
+    flash('School added successfully!', 'success')
+    return redirect(url_for('school_management'))
+
+
+@app.route('/get_classes', methods=['GET'])
+@login_required
+def get_classes():
+    if current_user.role != 'Admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    school_id = request.args.get('school_id')
+    classes = Class.query.filter_by(school_id=school_id).all()
+    return jsonify([{'id': cls.id, 'class_name': cls.class_name} for cls in classes])
+
+
+@app.route('/get_sections', methods=['GET'])
+@login_required
+def get_sections():
+    if current_user.role != 'Admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    class_id = request.args.get('class_id')
+    sections = Section.query.filter_by(class_id=class_id).all()
+    return jsonify([{'id': section.id, 'section_name': section.section_name} for section in sections])
+
+
+@app.route('/add-class', methods=['POST'])
+@login_required
+def add_class():
+    if current_user.role != 'Admin':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('index'))
+
+    school_id = request.form['school_id']
+    class_name = request.form['class_name']
+
+    if not class_name or not school_id:
+        flash('Class name and school ID are required!', 'error')
+        return redirect(url_for('school_management'))
+
+    school = School.query.get(school_id)
+    if not school:
+        flash('School not found!', 'error')
+        return redirect(url_for('school_management'))
+    
+    existing_class = Class.query.filter_by(school_id=school_id, class_name=class_name).first()
+    if existing_class:
+        flash(f'Class "{class_name}" already exists in this school!', 'error')
+        return redirect(url_for('school_management'))
+
+    new_class = Class(school_id=school_id, class_name=class_name)
+    db.session.add(new_class)
+    db.session.commit()
+    flash('Class added successfully!', 'success')
+    return redirect(url_for('school_management'))
+
+
+@app.route('/add-section', methods=['POST'])
+@login_required
+def add_section():
+    if current_user.role != 'Admin':
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('index'))
+
+    class_id = request.form['class_id']
+    section_name = request.form['section_name']
+
+    if not section_name or not class_id:
+        flash('Section name and class ID are required!', 'error')
+        return redirect(url_for('school_management'))
+
+    class_obj = Class.query.get(class_id)
+    if not class_obj:
+        flash('Class not found!', 'error')
+        return redirect(url_for('school_management'))
+    
+    existing_section = Section.query.filter_by(class_id=class_id, section_name=section_name).first()
+    if existing_section:
+        flash(f'Section "{section_name}" already exists in this class!', 'error')
+        return redirect(url_for('school_management'))
+
+    new_section = Section(class_id=class_id, section_name=section_name)
+    db.session.add(new_section)
+    db.session.commit()
+    flash('Section added successfully!', 'success')
+    return redirect(url_for('school_management'))

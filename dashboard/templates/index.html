@@ -2,21 +2,23 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row text-center">
+        {% if user_role == 'Admin' %}
         <div class="col-md-4">
             <div class="card shadow-lg border-0 rounded-3">
                 <div class="card-body">
                     <h5 class="card-title">👨‍🏫 Teachers</h5>
                     <p class="card-text">Manage teachers and their details.</p>
-                    <a href="{{ url_for('view_teachers') }}" class="btn btn-primary">➕ View Teachers Details</a><br>
+                    <a href="{{ url_for('view_teachers') }}" class="btn btn-primary"> View Teachers Details</a><br>
                 </div>
             </div>
         </div>
+        {% endif %}
         <div class="col-md-4">
             <div class="card shadow-lg border-0 rounded-3">
                 <div class="card-body">
                     <h5 class="card-title">🎓 Students</h5>
                     <p class="card-text">Manage students and their details.</p>
-                    <a href="{{ url_for('view_students') }}" class="btn btn-primary">➕ View Students Details</a><br>
+                    <a href="{{ url_for('view_students') }}" class="btn btn-primary"> View Students Details</a><br>
                 </div>
             </div>
         </div>
@@ -25,7 +27,7 @@
                 <div class="card-body">
                     <h5 class="card-title">👨‍👩‍👧 Parents</h5>
                     <p class="card-text">Manage parents and their details.</p>
-                    <a href="{{ url_for('view_parents') }}" class="btn btn-primary">➕ View Parents Details</a><br>
+                    <a href="{{ url_for('view_parents') }}" class="btn btn-primary"> View Parents Details</a><br>
                 </div>
             </div>
         </div>
